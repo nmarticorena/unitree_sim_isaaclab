@@ -38,7 +38,7 @@ RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkg
     conda clean -afy
 
 # 切换到 Conda 环境
-SHELL ["conda", "run", "-n", "unitree_sim_env", "/bin/bash", "-c"]  
+SHELL ["conda", "run", "-n", "unitree_sim_env", "/bin/bash", "-c"]
 
 
 
@@ -63,7 +63,7 @@ RUN git clone https://github.com/isaac-sim/IsaacLab.git && \
     cd IsaacLab && \
     git checkout v2.2.0 && \
     ./isaaclab.sh --install
-    
+
 # 构建 CycloneDDS
 RUN git clone https://github.com/eclipse-cyclonedds/cyclonedds -b releases/0.10.x /cyclonedds && \
     cd /cyclonedds && mkdir build install && cd build && \
@@ -78,8 +78,9 @@ RUN git clone https://github.com/unitreerobotics/unitree_sdk2_python && \
     cd unitree_sdk2_python && pip install -e .
 
 # 克隆 unitree_sim_isaaclab
-RUN git clone https://github.com/unitreerobotics/unitree_sim_isaaclab.git /home/code/unitree_sim_isaaclab && \
-    cd /home/code/unitree_sim_isaaclab && pip install -r requirements.txt
+RUN git clone --recursive https://github.com/nmarticorena/unitree_sim_isaaclab.git /home/code/unitree_sim_isaaclab && \
+    cd /home/code/unitree_sim_isaaclab && pip install -r requirements.txt && \
+    cd /home/code/unitree_sim_isaaclab/teleimager && pip install -e .
 
 
 # ==============================
