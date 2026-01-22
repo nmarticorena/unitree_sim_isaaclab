@@ -1,0 +1,93 @@
+[workspace]
+channels = ["conda-forge"]
+name = "unitree_sim_isaaclab"
+platforms = ["linux-64"]
+version = "0.1.0"
+# Trick from https://github.com/garylvov/pixidock_template
+conda-pypi-map = { "conda-forge" = "conda_pypi_map.json" }
+
+[activation]
+scripts = ["patch_lib.sh"]
+
+
+[system-requirements]
+cuda="12.6"
+libc = "2.35"
+
+[pypi-options]
+extra-index-urls = ["https://pypi.nvidia.com"]
+
+[tasks]
+
+[dependencies]
+python = "3.11.*"
+pytorch = {version = "==2.7.0", build = "cuda126*"}
+torchvision = "==0.22.0"
+torchaudio = "==2.7.0"
+cuda = "12.6.*"
+
+# Need newer GCC/binutils to work with glibc 2.39's .relr.dyn sections
+gxx = "11.3.*"
+gcc = "11.3.*"
+cmake = ">=4.2.2,<5"
+
+
+# isaacsim pinned versions
+typing-extensions= "==4.12.2"
+numpy= "==1.26.0"
+pillow = "==11.3.0"
+sympy= "==1.13.3"
+networkx= "==3.3"
+fsspec= "==2024.6.1"
+filelock= "==3.13.1"
+markupsafe= "==2.1.3"
+pywin32= "==306"
+pip = ">=25.3,<26"
+libstdcxx-ng = ">=15.2.0,<16"
+libstdcxx = ">=15.2.0,<16"
+cuda-nvcc = ">=12.6.85,<13"
+compilers = ">=1.5.2,<2"
+git-lfs = ">=3.7.1,<4"
+aiortc = ">=1.14.0,<2"
+cryptography = "==44.0.0"
+
+[pypi-dependencies]
+#isaacsim-kernel = { version = "==5.1.0" }
+#isaacsim-app = { version = "==5.1.0" }
+##isaacsim-asset = { version = "==5.1.0" }
+#isaacsim-benchmark = { version = "==5.1.0" }
+#isaacsim-code-editor = { version = "==5.1.0" }
+#isaacsim-core = { version = "==5.1.0" }
+#isaacsim-cortex = { version = "==5.1.0" }
+#isaacsim-example = { version = "==5.1.0" }
+#isaacsim-gui = { version = "==5.1.0" }
+#isaacsim-replicator = { version = "==5.1.0" }
+#isaacsim-rl = { version = "==5.1.0" }
+#isaacsim-robot = { version = "==5.1.0" }
+#isaacsim-robot-motion = { version = "==5.1.0" }
+#isaacsim-robot-setup = { version = "==5.1.0" }
+#isaacsim-ros2 = { version = "==5.1.0" }
+#isaacsim-sensor = { version = "==5.1.0" }
+#isaacsim-storage = { version = "==5.1.0" }
+#isaacsim-template = { version = "==5.1.0" }
+#isaacsim-test = { version = "==5.1.0" }
+#isaacsim-utils = { version = "==5.1.0" }
+#isaacsim-extscache-kit = { version = "==5.1.0" }
+#isaacsim-extscache-kit-sdk = { version = "==5.1.0" }
+#isaacsim-extscache-physics = { version = "==5.1.0" }
+
+isaacsim= {version = "==5.1.0", extras = ["all", "extscache"]}
+
+
+
+isaaclab        = { path = "IsaacLab/source/isaaclab", editable = true }
+isaaclab-assets = { path = "IsaacLab/source/isaaclab_assets", editable = true }
+isaaclab-tasks  = { path = "IsaacLab/source/isaaclab_tasks", editable = true }
+isaaclab-rl     = { path = "IsaacLab/source/isaaclab_rl", editable = true }
+isaaclab-mimic  = { path = "IsaacLab/source/isaaclab_mimic", editable = true }
+
+
+teleimager = {path = "teleimager", editable = true}
+skrl = ">=1.4.3, <2"
+
+
