@@ -83,6 +83,9 @@ RUN git clone --recursive https://github.com/nmarticorena/unitree_sim_isaaclab.g
     cd /home/code/unitree_sim_isaaclab/teleimager && pip install -e .
 
 
+RUN export CONDA_PLUGINS_AUTO_ACCEPT_TOS=true && \
+	conda install  -y -c conda-forge "aiortc"
+
 # ==============================
 # Stage 2: Runtime
 # ==============================
