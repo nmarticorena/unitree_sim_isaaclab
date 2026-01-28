@@ -2,3 +2,9 @@
 	path = teleimager
 	url = https://github.com/nmarticorena/teleimager
 	branch = main
+[submodule "IsaacLab"]
+	path = IsaacLab
+	url = git@github.com:isaac-sim/IsaacLab.git
+[submodule "unitree_sdk2_python"]
+	path = unitree_sdk2_python
+	url = https://github.com/unitreerobotics/unitree_sdk2_python.git
