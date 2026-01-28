@@ -28,6 +28,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+*.pyc
 
 # ================================
 # env
@@ -121,4 +122,6 @@ data/
 
 assets/
 assets.*
-assets
+assets# pixi environments
+.pixi/*
+!.pixi/config.toml
