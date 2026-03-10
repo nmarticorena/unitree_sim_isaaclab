@@ -36,6 +36,7 @@ class RobotController:
         
         all_joint_names = env.scene["robot"].data.joint_names
         self._last_action = torch.zeros(len(all_joint_names), device=env.device)
+        self._last_torque = torch.zeros(len(all_joint_names), device=env.device)
         
         
         # pre-calculate the sleep threshold (avoid calculating every time)
@@ -104,16 +105,21 @@ class RobotController:
         # 1. minimal action acquisition (synchronous, zero thread competition, pre-calculated strategy)
         action_start = perf_counter()
         action = None
+        torque = None
         
         # try to get the action from the action provider
         if self.action_provider:
-            action = self.action_provider.get_action(self.env)
+            action, torque = self.action_provider.get_action(self.env)
             if action is not None:
                 self._last_action = action
+            if torque is not None:
+                self._last_torque = torque
         
         # if no action is obtained, use the pre-calculated fallback strategy
         if action is None:
             action = self._last_action
+        if torque is None:
+            torque = self._last_torque
 
         action_time = perf_counter() - action_start
         
@@ -124,6 +130,11 @@ class RobotController:
                 pass
                 # self.env.sim.render()
             else:
+                robot = self.env.scene["robot"]
+                
+                if torque is not None:
+                    robot.set_joint_effort_target(torque)
+                    robot.write_data_to_sim()
                 self.env.step(action)
             env_time = perf_counter() - env_start
             

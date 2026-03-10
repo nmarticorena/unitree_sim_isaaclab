@@ -3,7 +3,7 @@
 # License: Apache License, Version 2.0
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Tuple
 import torch
 import time
 import threading
@@ -18,7 +18,7 @@ class ActionProvider(ABC):
         self._thread = None
     
     @abstractmethod
-    def get_action(self, env) -> Optional[torch.Tensor]:
+    def get_action(self, env) -> Optional[Tuple[torch.Tensor, torch.Tensor]]:
         """Get action
         
         Args:
