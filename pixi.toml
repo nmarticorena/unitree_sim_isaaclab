@@ -16,10 +16,13 @@ libc = "2.35"
 
 [pypi-options]
 extra-index-urls = ["https://pypi.nvidia.com"]
-no-build-isolation = false
+no-build-isolation = true
 
 [tasks]
-run-sim = {cmd = "python sim_main.py --device cpu  --enable_cameras  --task  Isaac-PickPlace-RedBlock-G129-Inspire-Joint   --enable_inspire_dds --robot_type g129   --device=cuda --action_source dds --headless"}
+run-sim = {cmd = "python sim_main.py --device cuda  --enable_cameras  --task  Isaac-PickPlace-RedBlock-G129-Inspire-Joint   --enable_inspire_dds --robot_type g129   --device=cuda --action_source dds --headless"}
+run-cylinder-inspire = {cmd = "python sim_main.py --device cuda  --enable_cameras  --task  Isaac-Stack-RgyBlock-G129-Inspire-Joint   --enable_inspire_dds --robot_type g129   --device=cuda --action_source dds"}
+run-cylinder-dex3 = {cmd = "python sim_main.py --device cuda  --enable_cameras  --task  Isaac-Stack-RgyBlock-G129-Dex3-Joint   --enable_dex3_dds --robot_type g129   --device=cuda --action_source dds"}
+kill_sim = {cmd = "pkill -9 -f sim_main.py"}
 
 [dependencies]
 python = "3.11.*"
@@ -70,6 +73,7 @@ idna = "==3.10"
 yarl = "==1.18.3"
 multidict = "==6.1.0"
 opencv = ">=4.12.0,<5"
+openusd = ">=25.11,<26"
 
 
 [pypi-dependencies]
@@ -89,3 +93,6 @@ unitree-sdk2py = {path = "unitree_sdk2_python/", editable = true}
 skrl = ">=1.4.3, <2"
 # aiortc = "==1.9.0"
 aiortc = ">=1.14.0, <2"
+active-adaptation = {path = "../gentle-humanoid-training", editable = true}
+whole_body_tracking = {path = "../whole_body_tracking/source/whole_body_tracking", editable = true}
+rsl-rl-lib = ">=4.0.1, <5"
