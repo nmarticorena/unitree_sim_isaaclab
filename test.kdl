@@ -1,0 +1,19 @@
+layout {
+    pane {
+        command "pixi"
+        args "run" "nvim" "."
+    }
+
+    pane split_direction="vertical" {
+        pane {
+            command "sh"
+            args "-c" "echo 'Terminal for extra stuff'; exec $SHELL"
+        }
+
+        pane {
+            command "pixi"
+            args "run" "run-cylinder-inspire" "--headless"
+        }
+    }
+}
+
