@@ -124,17 +124,39 @@ Currently, the project employs Unitree G1/H1-2 robots equipped with different ac
 
 ## 2、⚙️ Environment Setup and Running
 
-This project requires Isaac Sim 4.5.0/Isaac Sim 5.0.0 and Isaac Lab. You can refer to the [official installation guide](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/pip_installation.html)  or follow the steps below. The installation methods for Ubuntu 20.04 and Ubuntu 22.04 (and later versions) are different. Please choose the installation method based on your system version and GPU resources.
+This project requires Isaac Sim 4.5.0/Isaac Sim 5.x.0 and Isaac Lab. You can refer to the [official installation guide](https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/pip_installation.html)  or follow the steps below. The installation methods for Ubuntu 20.04 and Ubuntu 22.04 (and later versions) are different. Please choose the installation method based on your system version and GPU resources.
 
 ### 2.1 Isaac Sim 4.5.0 Environment Installation
 
+The environment can be installed using one of the following two methods:
+- Use the `auto_setup_env.sh` script for automatic installation.
+
+```
+chmod +x auto_setup_env.sh
+bash auto_setup_env.sh 4.5 unitree_sim_env
+```
+- Follow the documentation below for installation.
+
 Please refer to the <a href="doc/isaacsim4.5_install.md">Isaac Sim 4.5.0 Environment Installation Steps</a> for the setup.
 
-### 2.2 Isaac Sim 5.0.0 Environment Installation
+### 2.2 Isaac Sim 5.0.0/5.1.0 Environment Installation
 
-Please refer to the <a href="doc/isaacsim5.0_install.md">Isaac Sim 5.0.0 Environment Installation Steps</a> for the setup.
+The environment can be installed using one of the following two methods:
+- Use the `auto_setup_env.sh` script for automatic installation.
 
-### 2.3 Build the Docker Environment (Using Ubuntu 22.04 / IsaacSim 5.0)
+```
+chmod +x auto_setup_env.sh
+bash auto_setup_env.sh 5.0 unitree_sim_env 
+or 
+bash auto_setup_env.sh 5.1 unitree_sim_env
+```
+- Follow the documentation below for installation.
+
+Please refer to the <a href="doc/isaacsim5.0_install.md">Isaac Sim 5.0.0 Environment Installation Steps</a>， <a href="doc/isaacsim5.1_install.md">Isaac Sim 5.1.0 Environment Installation Steps</a> for the setup.
+
+**Recommended:** Use the `auto_setup_env.sh` script to automatically install the environment and download the required assets.
+
+### 2.3 Build the Docker Environment (Using Ubuntu 22.04 / IsaacSim 5.1)
 
 #### 2.3.1 Build the Docker environment
 ```shell
@@ -179,21 +201,25 @@ sudo apt install git-lfs
 python sim_main.py --device cpu  --enable_cameras  --task  Isaac-PickPlace-Cylinder-G129-Dex1-Joint    --enable_dex1_dds --robot_type g129
 ```
 
-- --task: Task name, corresponding to the task names in the table above
-- --enable_dex1_dds/--enable_dex3_dds: Represent enabling DDS for two-finger gripper/three-finger dexterous hand respectively  
-- --robot_type: Robot type, currently has 29-DOF unitree g1 (g129),27-DoF H1-2
-- --headless: This allows running without launching the simulation window. Add this parameter if you're using a Docker environment.
+- `--task`: Task name, corresponding to the task names in the table above
+- `--enable_dex1_dds/--enable_dex3_dds`: Represent enabling DDS for two-finger gripper/three-finger dexterous hand respectively  
+- `--robot_type`: Robot type, currently has 29-DOF unitree g1 (g129),27-DoF H1-2
+- `--no_render`: Run without launching the Sim window and enable the WebRTC video stream. If running in a Docker environment, please add this parameter. You can use the Isaac Sim WebRTC Streaming Client to view the video feed.
+.
 
-**Note:** If you need to control robot movement, please refer to `send_commands_8bit.py` or `send_commands_keyboard.py` to publish control commands, or you can use them directly. Please note that only tasks marked with `Wholebody` are mobile tasks and can control the robot's movement.
+**Note 1:** If you need to control robot movement, please refer to `send_commands_8bit.py` or `send_commands_keyboard.py` to publish control commands, or you can use them directly. Please note that only tasks marked with `Wholebody` are mobile tasks and can control the robot's movement.
+
+**Note 2:** The Isaac Sim WebRTC Streaming Client is a tool provided by NVIDIA Isaac Sim for viewing the Sim window remotely. For installation and usage details, please refer to the 
+[official documentation](https://docs.isaacsim.omniverse.nvidia.com/6.0.0/installation/manual_livestream_clients.html)
 
 #### 2.4.3 Data Replay
 
 ```
 python sim_main.py --device cpu  --enable_cameras  --task Isaac-Stack-RgyBlock-G129-Dex1-Joint     --enable_dex1_dds --robot_type g129 --replay  --file_path "/home/unitree/Code/xr_teleoperate/teleop/utils/data" 
 ```
-- --replay: Specifies whether to perform data replay.
+- `--replay:` Specifies whether to perform data replay.
 
-- --file_path: Directory where the dataset is stored (please update this to your own dataset path).
+- `--file_path:` Directory where the dataset is stored (please update this to your own dataset path).
 
 
 **Note:** The dataset format used here is consistent with the one recorded via teleoperation in [xr_teleoperate](https://github.com/unitreerobotics/xr_teleoperate) .
@@ -207,18 +233,22 @@ During data replay, by modifying lighting conditions and camera parameters and r
 python sim_main.py --device cpu  --enable_cameras  --task Isaac-Stack-RgyBlock-G129-Dex1-Joint     --enable_dex1_dds --robot_type g129 --replay  --file_path "/home/unitree/Code/xr_teleoperate/teleop/utils/data" --generate_data --generate_data_dir "./data2"
 ```
 
-- --generate_data: Enables generation of new data.
+- `--generate_data:` Enables generation of new data.
 
-- --generate_data_dir: Directory to store the newly generated data.
+- `--generate_data_dir:` Directory to store the newly generated data.
 
-- --rerun_log: Enables logging during data generation.
+- `--rerun_log:` Enables logging during data generation.
 
-- --modify_light: Enables modification of lighting conditions (you need to adjust the update_light function in main accordingly).
+- `--modify_light:` Enables modification of lighting conditions (you need to adjust the update_light function in main accordingly).
 
-- --modify_camera: Enables modification of camera parameters (you need to adjust the batch_augment_cameras_by_name function in main accordingly).
+- `--modify_camera:` Enables modification of camera parameters (you need to adjust the batch_augment_cameras_by_name function in main accordingly).
 
 **Note:**
 If you wish to modify lighting or camera parameters, please tune and test the parameters carefully before performing large-scale data generation.
+
+
+**Note:** If you are using the simulation together with `xr_teleoperate` for data collection, you need to modify the IP address of the `image_server` in `xr_teleoperate` to match the IP address where the simulation is running.
+
 
 ## 3、Task Scene Construction
 

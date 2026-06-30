@@ -85,6 +85,7 @@ build/
 install/
 .catkin_workspace
 *.pyc
+__pycache__/*
 
 # Gazebo 相关
 *.world~
@@ -122,6 +123,10 @@ data/
 
 assets/
 assets.*
-assets# pixi environments
+
+# pixi environments
 .pixi/*
 !.pixi/config.toml
+
+${data}
+*.etli
