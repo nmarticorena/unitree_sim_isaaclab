@@ -268,7 +268,7 @@ class DDSActionProvider(ActionProvider):
             
         except Exception as e:
             print(f"[{self.name}] Get DDS action failed: {e}")
-            return None
+            return None, None
     
     def _convert_to_joint_range(self, value):
         """Convert gripper control value to joint angle"""
