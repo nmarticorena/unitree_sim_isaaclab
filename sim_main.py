@@ -4,6 +4,7 @@
 #!/usr/bin/env python3
 # main.py
 import os
+import traceback
 
 project_root = os.path.dirname(os.path.abspath(__file__))
 os.environ["PROJECT_ROOT"] = project_root
@@ -577,6 +578,7 @@ def main():
     
     except Exception as e:
         print(f"\nprogram exception: {e}")
+        traceback.print_exc()
     
     finally:
         # clean up resources
