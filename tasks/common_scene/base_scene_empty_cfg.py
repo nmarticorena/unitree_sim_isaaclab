@@ -26,33 +26,10 @@ class EmptySceneCfg(InteractiveSceneCfg): # inherit from the interactive scene c
             rot=[1.0, 0.0, 0.0, 0.0]
         ),
         spawn=UsdFileCfg(
-            usd_path=f"{ISAAC_NUCLEUS_DIR}/Environments/Simple_Warehouse/warehouse.usd",  # use simple room model
+            usd_path=f"{project_root}/assets/objects/empty_warehouse/small_warehouse_digital_twin.usd",
         ),
     )
-    # Object
-    # 2. object configuration (cylinder)     
-    object = RigidObjectCfg(
-        prim_path="/World/envs/env_.*/Object",    # object in the scene
-        init_state=RigidObjectCfg.InitialStateCfg(pos=[-0.35, 0.40, 0.84], # initial position (pos) 
-                                                  rot=[1, 0, 0, 0]), # initial rotation (rot)
-        spawn=sim_utils.CylinderCfg(
-            radius=0.018,    # cylinder radius (radius)
-            height=0.35,     # cylinder height (height)
- 
-            rigid_props=sim_utils.RigidBodyPropertiesCfg(
-            ),    # rigid body properties configuration (rigid_props)
-            mass_props=sim_utils.MassPropertiesCfg(mass=0.4),    # mass properties configuration (mass)
-            collision_props=sim_utils.CollisionPropertiesCfg(),    # collision properties configuration (collision_props)
-            visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(0.15, 0.15, 0.15), metallic=1.0),    # visual material configuration (visual_material)
-            physics_material=sim_utils.RigidBodyMaterialCfg(
-                friction_combine_mode="max",    # friction combine mode
-                restitution_combine_mode="min",    # restitution combine mode
-                static_friction=1.5,    # static friction coefficient
-                dynamic_friction=1.5,    # dynamic friction coefficient
-                restitution=0.0,    # restitution coefficient (no restitution)
-            ),
-        ),
-    )
+
     
 
     # Lights
@@ -63,7 +40,7 @@ class EmptySceneCfg(InteractiveSceneCfg): # inherit from the interactive scene c
                                      intensity=3000.0),    # light intensity
     )
 
-    world_camera = CameraBaseCfg.get_camera_config(prim_path="/World/PerspectiveCamera",
-                                                    pos_offset=(-0.1, 3.6, 1.6),
-                                                    rot_offset=( -0.00617,0.00617, 0.70708, -0.70708),
-                                                    focal_length = 16.5)
+    # world_camera = CameraBaseCfg.get_camera_config(prim_path="/World/PerspectiveCamera",
+    #                                                 pos_offset=(-0.1, 3.6, 1.6),
+    #                                                 rot_offset=( -0.00617,0.00617, 0.70708, -0.70708),
+    #                                                 focal_length = 16.5)
