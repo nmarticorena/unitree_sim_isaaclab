@@ -19,6 +19,8 @@ extra-index-urls = ["https://pypi.nvidia.com"]
 no-build-isolation = true
 
 [tasks]
+movable_sim = {cmd = "python sim_main.py --device cuda --task Isaac-Push-Cart-G129-Inspire-Wholebody --enable_inspire_dds --robot_type g129 --action_source dds"}
+list-tasks = {cmd = "python tools/list_registered_tasks.py"}
 run-sim = {cmd = "python sim_main.py --device cuda  --enable_cameras  --task  Isaac-PickPlace-RedBlock-G129-Inspire-Joint   --enable_inspire_dds --robot_type g129   --device=cuda --action_source dds --headless"}
 run-cylinder-inspire = {cmd = "python sim_main.py --device cuda  --enable_cameras  --task  Isaac-Stack-RgyBlock-G129-Inspire-Joint   --enable_inspire_dds --robot_type g129   --device=cuda --action_source dds"}
 run-cylinder-dex3 = {cmd = "python sim_main.py --device cuda  --enable_cameras  --task  Isaac-Stack-RgyBlock-G129-Dex3-Joint   --enable_dex3_dds --robot_type g129   --device=cuda --action_source dds"}
