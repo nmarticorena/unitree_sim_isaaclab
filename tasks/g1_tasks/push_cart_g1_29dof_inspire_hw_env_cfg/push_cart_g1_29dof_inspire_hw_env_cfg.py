@@ -1,10 +1,9 @@
 # Copyright (c) 2025, Unitree Robotics Co., Ltd. All Rights Reserved.
 # License: Apache License, Version 2.0  
-import tempfile
+from isaaclab.assets.asset_base_cfg import AssetBaseCfg
+import os
+from isaaclab.sim.spawners.from_files.from_files_cfg import UsdFileCfg
 import torch
-from dataclasses import MISSING
-
-from pink.tasks import FrameTask
 
 import isaaclab.envs.mdp as base_mdp
 from isaaclab.envs import ManagerBasedRLEnvCfg
@@ -12,11 +11,11 @@ from isaaclab.managers import EventTermCfg
 from isaaclab.managers import ObservationGroupCfg as ObsGroup
 from isaaclab.managers import ObservationTermCfg as ObsTerm
 from isaaclab.managers import SceneEntityCfg
-from isaaclab.managers import TerminationTermCfg as DoneTerm
 from isaaclab.managers import RewardTermCfg as RewTerm
 from isaaclab.utils import configclass
-from isaaclab.assets import ArticulationCfg
+from isaaclab.assets import ArticulationCfg, RigidObjectCfg
 from isaaclab.sensors import ContactSensorCfg
+import isaaclab.sim as sim_utils
 from . import mdp
 # use Isaac Lab native event system
 
@@ -30,6 +29,56 @@ from tasks.common_scene.base_scene_empty_cfg import EmptySceneCfg
 # Scene definition
 ##
 
+project_root = os.environ.get("PROJECT_ROOT")
+DOLLY_ROOT_Z = 0.52
+DOLLY_DEFAULT_POS = (-4.75, -3.25, DOLLY_ROOT_Z)
+DOLLY_RANDOM_POSE_RANGE = {"x": (-3.5, -3), "y": (-3.5, -3.0), "z": (DOLLY_ROOT_Z, DOLLY_ROOT_Z)}
+DOLLY_RANDOM_VELOCITY_RANGE = {}
+
+
+def _resolve_env_ids(env, env_ids):
+    if env_ids is None or isinstance(env_ids, slice):
+        return torch.arange(env.num_envs, device=env.device)
+    return env_ids
+
+
+def _sample_uniform_ranges(range_cfg, keys, default_values, device):
+    samples = default_values.clone()
+    for index, key in enumerate(keys):
+        if key in range_cfg:
+            low, high = range_cfg[key]
+            samples[:, index] = torch.empty(samples.shape[0], device=device).uniform_(float(low), float(high))
+    return samples
+
+
+def _reset_dolly_random(env, env_ids):
+    env_ids = _resolve_env_ids(env, env_ids)
+    asset = env.scene["dolly"]
+    root_states = asset.data.default_root_state[env_ids].clone()
+
+    positions = _sample_uniform_ranges(
+        DOLLY_RANDOM_POSE_RANGE,
+        ("x", "y", "z"),
+        root_states[:, 0:3],
+        asset.device,
+    )
+    positions += env.scene.env_origins[env_ids]
+    velocities = _sample_uniform_ranges(
+        DOLLY_RANDOM_VELOCITY_RANGE,
+        ("x", "y", "z", "roll", "pitch", "yaw"),
+        root_states[:, 7:13],
+        asset.device,
+    )
+    asset.write_root_pose_to_sim(torch.cat([positions, root_states[:, 3:7]], dim=-1), env_ids=env_ids)
+    asset.write_root_velocity_to_sim(velocities, env_ids=env_ids)
+
+
+def _reset_scene_with_random_dolly(env):
+    env_ids = torch.arange(env.num_envs, device=env.device)
+    base_mdp.reset_scene_to_default(env, env_ids)
+    return _reset_dolly_random(env, env_ids)
+
+
 @configclass
 class ObjectTableSceneCfg(EmptySceneCfg):
     """object table scene configuration class
@@ -41,6 +90,38 @@ class ObjectTableSceneCfg(EmptySceneCfg):
     # 5. humanoid robot configuration 
     robot: ArticulationCfg = G1RobotPresets.g1_29dof_inspire_wholebody(init_pos=(-3.9, -2.81811, 0.8),
         init_rot=(1, 0, 0, 0))
+
+    dolly: RigidObjectCfg = RigidObjectCfg(
+        prim_path="/World/envs/env_.*/Dolly",
+        init_state=RigidObjectCfg.InitialStateCfg(
+            pos=DOLLY_DEFAULT_POS,
+            rot=(1.0, 0.0, 0.0, 0.0),
+        ),
+        spawn=sim_utils.UsdFileCfg(
+            usd_path=f"{project_root}/assets/dolly/dolly_rigid.usd",
+
+            # Important: disable articulation roots created by the MJCF importer.
+            articulation_props=sim_utils.ArticulationRootPropertiesCfg(
+                articulation_enabled=False,
+            ),
+
+            # Make sure it behaves as a dynamic rigid object.
+            rigid_props=sim_utils.RigidBodyPropertiesCfg(
+                rigid_body_enabled=True,
+                kinematic_enabled=False,
+                disable_gravity=False,
+            ),
+
+            mass_props=sim_utils.MassPropertiesCfg(
+                mass=3.0,
+            ),
+
+            collision_props=sim_utils.CollisionPropertiesCfg(
+                contact_offset=0.02,
+                rest_offset=0.0,
+            ),
+        ),
+)
 
     contact_forces = ContactSensorCfg(prim_path="/World/envs/env_.*/Robot/.*", history_length=10, track_air_time=True, debug_vis=False)
     # 6. add camera configuration 
@@ -95,26 +176,14 @@ class TerminationsCfg:
 
 @configclass
 class RewardsCfg:
-    reward = RewTerm(func=mdp.compute_reward,weight=1.0)
+    reward = RewTerm(func=mdp.compute_reward, weight=1.0, params={"object_cfg": SceneEntityCfg("dolly")})
 
 @configclass
 class EventCfg:
-    pass
-    # reset_object = EventTermCfg(
-    #     func=mdp.reset_root_state_uniform,  # use uniform distribution reset function
-    #     mode="reset",   # set event mode to reset
-    #     params={
-    #         # position range parameter
-    #         "pose_range": {
-    #             "x": [-0.05, 0.05],  # x axis position range: -0.05 to 0.0 meter
-    #             "y": [-0.05, 0.05],   # y axis position range: 0.0 to 0.05 meter
-    #         },
-    #         # speed range parameter (empty dictionary means using default value)
-    #         "velocity_range": {},
-    #         # specify the object to reset
-    #         "asset_cfg": SceneEntityCfg("object"),
-    #     },
-    # )
+    reset_dolly = EventTermCfg(
+        func=_reset_dolly_random,
+        mode="reset",
+    )
 
 
 @configclass
@@ -152,27 +221,19 @@ class PushCartG129InspireWholebodyEnvCfg(ManagerBasedRLEnvCfg):
         self.sim.physx.gpu_total_aggregate_pairs_capacity = 16 * 1024
         self.sim.physx.friction_correlation_distance = 0.00625
 
-                # 物理材料属性设置 / Physics material properties
-        self.sim.physics_material.static_friction = 1.0  # 静摩擦系数 / Static friction
-        self.sim.physics_material.dynamic_friction = 1.0  # 动摩擦系数 / Dynamic friction
-        self.sim.physics_material.friction_combine_mode = "max"  # 摩擦力合并模式 / Friction combine mode
-        self.sim.physics_material.restitution_combine_mode = "max"  # 恢复系数合并模式 / Restitution combine mode
+                # Physics material properties
+        self.sim.physics_material.static_friction = 1.0  # Static friction
+        self.sim.physics_material.dynamic_friction = 1.0  # Dynamic friction
+        self.sim.physics_material.friction_combine_mode = "max"  # Friction combine mode
+        self.sim.physics_material.restitution_combine_mode = "max"  # Restitution combine mode
         # create event manager
         self.event_manager = SimpleEventManager()
 
-        # register "reset object" event
+        # register "reset dolly" event
         self.event_manager.register("reset_object_self", SimpleEvent(
-            func=lambda env: base_mdp.reset_root_state_uniform(
-                env,
-                torch.arange(env.num_envs, device=env.device),
-                pose_range={"x": [-0.05, 0.05], "y": [0.0, 0.05]},
-                velocity_range={},
-                asset_cfg=SceneEntityCfg("object"),
-            )
+            func=lambda env: _reset_dolly_random(env, torch.arange(env.num_envs, device=env.device))
         ))
         
         self.event_manager.register("reset_all_self", SimpleEvent(
-            func=lambda env: base_mdp.reset_scene_to_default(
-                env,
-                torch.arange(env.num_envs, device=env.device))
+            func=_reset_scene_with_random_dolly
         ))
